@@ -3,6 +3,7 @@ import time
 import Pyro4
 from gateway.class_for_gateway.manage_data_gateway import ManageDataNameServer
 from security.authenticate import AuthenticationManager
+from utils.errors import ErrorTypes
 from utils.types.agent_nameserver_type import AgentNSType
 from utils.types.client_nameserver_type import (ClientNSType)
 from utils.get_ip import get_ip
@@ -105,7 +106,8 @@ class GatewayManager:
     def register_agent(self, agent_data: AgentNSType):
         ip_entity = self.get_ip_entinty()
         try:
-            is_authenticated = self.security_manager.authenticate(ip_entity, agent_data["code_otp"])
+            code_otp = agent_data.get("code_otp", None)
+            is_authenticated = self.security_manager.authenticate(ip_entity, code_otp)
             print(f"Agent registration request {agent_data['name']} was {is_authenticated}.")
             if is_authenticated is True:
                 self.server.register_agent({
@@ -119,6 +121,10 @@ class GatewayManager:
             else:
                 raise ValueError("The agent could not be registered.")
         except CustomException as e:
+            # Si la ip ha sido bloqueada (raise CustomException(ErrorTypes.ip_blocked)) se le notifica al yellow_page
+            # para que elimine los agentes registrados con esa ip.
+            if e.error_type.code == ErrorTypes.ip_blocked.code:
+                self.server.remove_agent(ip_entity)
             return {"error": e.error_type.code, "message": e.error_type.message}
 
     @Pyro4.expose

@@ -7,8 +7,8 @@ configure_pyro()
 
 class AccessRegister:
     def set_register_access(self, key, data):
-        if os.path.exists("register_access.json"):
-            with open("register_access.json", "r") as f:
+        if os.path.exists("access_data.json"):
+            with open("access_data.json", "r") as f:
                 all_data = json.load(f)
         else:
             all_data = {}
@@ -17,8 +17,8 @@ class AccessRegister:
             json.dump(all_data, f)
 
     def get_register_access(self, key):
-        if os.path.exists("register_access.json"):
-            with open("register_access.json", "r") as f:
+        if os.path.exists("access_data.json"):
+            with open("access_data.json", "r") as f:
                 data = json.load(f)
                 return set(data.get(key, []))
         return set()

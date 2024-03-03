@@ -44,7 +44,7 @@ class AuthenticationManager:
         else:
             self.failed_attempts[ip] = self.failed_attempts.get(ip, 0) + 1
             print("Failed attempts: ", self.failed_attempts[ip])
-            if self.failed_attempts[ip] > 6:
+            if self.failed_attempts[ip] > 3:
                 self.__add_blacklist(ip)
                 raise CustomException(ErrorTypes.ip_blocked)
             else:
