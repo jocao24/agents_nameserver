@@ -41,15 +41,8 @@ class Login:
     def authenticate(self):
         response = self.gateway.register_entity(self.type_entity, self.data_entity)
         if response is True:
-            print("Successfully authenticated to the: ", print_current_time())
             gateway_uri = str(self.gateway)
             return gateway_uri
         else:
-            print("Error in the authentication to the: ", print_current_time())
-            error_code = str(response).split(":")[0].strip()
-            if error_code == ErrorTypes.ip_blocked.value[0]:
-                print(response)
-                exit(1)
-            else:
-                raise CustomException(ErrorTypes(response))
+            raise CustomException(ErrorTypes(response))
 
