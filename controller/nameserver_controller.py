@@ -26,7 +26,6 @@ class NameServerController:
             return result
         except Exception as e:
             error_type = self.determine_error_type(e)
-            print("Authentication error:", error_type)
             return {
                 "error": error_type.code,
                 "message": error_type.message.lower()
@@ -44,7 +43,6 @@ class NameServerController:
             return result
         except Exception as e:
             error_type = self.determine_error_type(e)
-            print("Authentication error:", error_type)
             return {
                 "error": error_type.code,
                 "message": error_type.message.lower()
