@@ -111,8 +111,10 @@ class GatewayManager:
     def register_client(self, client_data: ClientNSType):
         ip_entity = self.get_ip_entinty()
         try:
-            is_authenticated = self.security_manager.authenticate(ip_entity, client_data["code_otp"])
-            # print(f"Client registration request {client_data['name']} was {is_authenticated}.")
+            code_otp = client_data.get("code_otp", None)
+            log_message(f"Client registration request {client_data['name']}.")
+            is_authenticated = self.security_manager.authenticate(ip_entity, client_data["name"], "client", code_otp)
+            log_message(f"Client registration request {client_data['name']} was {is_authenticated}.")
             if is_authenticated is True:
                 return True
             else:
@@ -128,9 +130,8 @@ class GatewayManager:
         ip_entity = self.get_ip_entinty()
         try:
             code_otp = agent_data.get("code_otp", None)
-            log_message(f"Agent registration request {agent_data['name']} with code_otp {code_otp}.")
-            is_authenticated = self.security_manager.authenticate(ip_entity, code_otp)
-            # print(f"Agent registration request {agent_data['name']} was {is_authenticated}.")
+            log_message(f"Agent registration request {agent_data['name']}.")
+            is_authenticated = self.security_manager.authenticate(ip_entity, agent_data["name"], "agent", code_otp)
             log_message(f"Agent registration request {agent_data['name']} was {is_authenticated}.")
             if is_authenticated is True:
                 self.server.register_agent({
@@ -146,10 +147,9 @@ class GatewayManager:
                 log_message(message)
                 raise ValueError(message)
         except CustomException as e:
-            # Si la ip ha sido bloqueada (raise CustomException(ErrorTypes.ip_blocked)) se le notifica al yellow_page
-            # para que elimine los agentes registrados con esa ip.
-            if e.error_type.code == ErrorTypes.ip_blocked.code:
-                self.server.remove_agent(ip_entity)
+            # if e.error_type.code == ErrorTypes.ip_blocked.code:
+                # en lugar de enviar una ip se envian las ip que aparecen en la lista negra
+                # self.server.remove_agent(ip_entity)
             return {"error": e.error_type.code, "message": e.error_type.message}
 
     @Pyro4.expose
@@ -177,16 +177,125 @@ class GatewayManager:
             print("3. Add blacklist")
             print("4. View whitelist")
             print("5. View blacklist")
-            print("6. Exit")
+            print("6. Remove whitelist")
+            print("7. Remove blacklist")
+            print("8. Exit")
             option = input("Enter the number of the option you want to execute: ")
             if option.isdigit():
                 option = int(option)
                 if option == 1:
+                    print("===================================================================")
+                    logs = get_end_session_log()
+                    print(logs)
                     print("====================================================================")
-                    for log in logs:
-                        print(log)
+                elif option == 2:
+                    ip = input("Enter the IP you want to add to the whitelist: ")
+                    is_valid_ip = validate_ip(ip)
+                    if is_valid_ip:
+                        messages = self.security_manager.add_whhite_list(ip)
+                        for message in messages:
+                            print(message)
+                    else:
+                        print("The IP entered is not valid. Please enter a valid IP.")
+                elif option == 3:
+                    ip = input("Enter the IP you want to add to the blacklist: ")
+                    is_valid_ip = validate_ip(ip)
+                    if is_valid_ip:
+                        messages = self.security_manager.add_blacklist(ip)
+                        for message in messages:
+                            print(message)
+                    else:
+                        print("The IP entered is not valid. Please enter a valid IP.")
+
+                elif option == 4:
+                    whitelist = self.security_manager.get_whitelist()
+                    i = 1
                     print("====================================================================")
+                    if len(whitelist):
+                        for ip in whitelist:
+                            print(f"{i}. {ip}")
+                            i += 1
+                    else:
+                        print("The whitelist is empty.")
+                    print("====================================================================")
+
+                elif option == 5:
+                    blacklist = self.security_manager.get_blacklist()
+                    i = 1
+                    print("====================================================================")
+                    if len(blacklist):
+                        for ip in blacklist:
+                            print(f"{i}. {ip}")
+                        i += 1
+                    else:
+                        print("The blacklist is empty.")
+                    print("====================================================================")
+
                 elif option == 6:
+                    whitelist = self.security_manager.get_whitelist()
+                    i = 1
+                    print("====================================================================")
+                    for ip in whitelist:
+                        print(f"{i}. {ip}")
+                        i += 1
+
+                    if len(whitelist):
+                        ip = input("Enter the number of the IP you want to remove from the whitelist: ")
+                        if ip.isdigit():
+                            ip = int(ip)
+                            if 0 < ip <= len(whitelist):
+                                ip = list(whitelist)[ip - 1]
+                                opt_select = input("Do you want to add it to the blacklist? (y/n): ")
+                                messages = self.security_manager.remove_whitelist(ip)
+                                if opt_select.lower() != 'n' and opt_select.lower() != 'y':
+                                    print("Invalid option. Please enter a valid option.")
+                                else:
+                                    if opt_select.lower() == 'y':
+                                        messages.append(self.security_manager.add_blacklist(ip))
+                                    for message in messages:
+                                        print(message)
+
+                            else:
+                                print("Invalid number. Please enter a valid number.")
+                        else:
+                            print("Invalid number. Please enter a valid number.")
+                    else:
+                        print("The whitelist is empty.")
+                    print("====================================================================")
+
+                elif option == 7:
+                    # Show blacklist
+                    blacklist = self.security_manager.get_blacklist()
+                    i = 1
+                    print("====================================================================")
+                    for ip in blacklist:
+                        print(f"{i}. {ip}")
+                        i += 1
+                    if len(blacklist):
+                        ip = input("Enter the number of the IP you want to remove from the blacklist: ")
+                        if ip.isdigit():
+                            ip = int(ip)
+                            if 0 < ip <= len(blacklist):
+                                ip = list(blacklist)[ip - 1]
+                                opt_select = input("Do you want to add it to the whitelist? (y/n): ")
+                                if opt_select.lower() != 'n' and opt_select.lower() != 'y':
+                                    print("Invalid option. Please enter a valid option.")
+                                else:
+                                    messages = self.security_manager.remove_blacklist(ip)
+                                    if opt_select.lower() == 'y':
+                                        messages.append(self.security_manager.add_whhite_list(ip))
+                                    for message in messages:
+                                        print(message)
+                            else:
+                                print("Invalid number. Please enter a valid number.")
+                        else:
+                            print("Invalid number. Please enter a valid number.")
+
+                    else:
+                        print("The blacklist is empty.")
+                    print("====================================================================")
+
+                elif option == 8:
                     self.finally_name_server.set()
                     break
                 else:
