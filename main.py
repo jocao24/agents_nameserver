@@ -7,6 +7,7 @@ import Pyro4
 from gateway.gateway_manager import GatewayManager
 from controller.nameserver_controller import NameServerController
 from manage_logs.manage_logs import start_new_session_log, log_message
+from security.security_deamon import SecureDaemon
 from utils.custom_exception import CustomException
 from utils.pyro_config import configure_pyro
 from utils.get_ip import get_ip
@@ -19,7 +20,7 @@ global_logs = []
 
 
 def signal_handler(signum, frame):
-    log_message("Cierre intencional por el usuario")
+    log_message("Intentional closure by the user")
     sys.exit(0)
 
 
@@ -65,7 +66,6 @@ if __name__ == '__main__':
         create_nameserver_space()
 
         if not wait_for_nameserver():
-            # print("Error: NameServer did not start correctly.")
             global_logs.append(log_message("Error: NameServer did not start correctly."))
             exit(1)
 
@@ -83,7 +83,7 @@ if __name__ == '__main__':
         ns_controller = NameServerController(nameserver, gateway_manager, gateway_uri=uri_gateway)
         uri_ns_controller = daemon.register(ns_controller)
         nameserver.register("ns_controller", uri_ns_controller)
-        # print(f"NameServerController registered with URI: {uri_ns_controller}")
+
         global_logs.append(log_message(f"NameServerController registered with URI: {uri_ns_controller}"))
 
         print("NameServer running...")
