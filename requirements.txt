@@ -3,3 +3,4 @@ qrcode==7.4.2
 pyotp==2.9.0
 typing-extensions==4.7.1
 typing==3.7.4.3
+cryptography

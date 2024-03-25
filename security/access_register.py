@@ -1,24 +1,33 @@
-import json
 import os
+from security.manage_file_security import encrypt_file, decrypt_file
 from utils.pyro_config import configure_pyro
+from utils.types.save_data_type import SaveDataType
 
 configure_pyro()
 
 
 class AccessRegister:
-    def set_register_access(self, key, data):
-        if os.path.exists("access_data.json"):
-            with open("access_data.json", "r") as f:
-                all_data = json.load(f)
-        else:
-            all_data = {}
-        all_data[key] = list(data)
-        with open("access_data.json", "w") as f:
-            json.dump(all_data, f)
+    def __init__(self, password: bytes):
+        self.name_file = "data/data.enc"
+        self.password = password
+        if not os.path.exists(self.name_file):
+            self.save({
+                'whitelist': set(),
+                'blacklist': set(),
+                'yellow_page_list': set()
+            })
 
-    def get_register_access(self, key):
-        if os.path.exists("access_data.json"):
-            with open("access_data.json", "r") as f:
-                data = json.load(f)
-                return set(data.get(key, []))
-        return set()
+    def save(self, data: SaveDataType):
+        encrypt_file(self.name_file, self.password, data)
+
+    def load(self) -> SaveDataType:
+        data = decrypt_file(self.name_file, self.password)
+        return data
+
+    def delete(self):
+        os.remove(self.name_file)
+
+
+
+
+
