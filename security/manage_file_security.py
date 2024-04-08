@@ -6,9 +6,9 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-from utils.custom_exception import CustomException
-from utils.errors import ErrorTypes
-from utils.types.save_data_type import SaveDataType
+from src.utils.custom_exception import CustomException
+from src.utils.errors import ErrorTypes
+from src.types.save_data_type import SaveDataType
 
 
 def derive_key(password: bytes, salt: bytes) -> bytes:

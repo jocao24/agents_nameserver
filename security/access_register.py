@@ -1,7 +1,7 @@
 import os
 from security.manage_file_security import encrypt_file, decrypt_file
-from utils.pyro_config import configure_pyro
-from utils.types.save_data_type import SaveDataType
+from src.utils.pyro_config import configure_pyro
+from src.types.save_data_type import SaveDataType
 
 configure_pyro()
 

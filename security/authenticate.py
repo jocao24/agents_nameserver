@@ -4,12 +4,9 @@ import time
 
 import pyotp
 import qrcode
-from manage_logs.manage_logs import log_message
-from utils.custom_exception import CustomException, ErrorTypes
+from src.manage_logs.manage_logs import log_message
+from src.utils.custom_exception import CustomException, ErrorTypes
 from security.access_register import AccessRegister
-from utils.pyro_config import configure_pyro
-
-configure_pyro()
 
 
 class AuthenticationManager:
