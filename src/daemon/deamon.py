@@ -30,17 +30,28 @@ class Daemon(Pyro4.Daemon):
         return hash_key(key)
 
     def validateHandshake(self, conn, request: RequestDataType):
+        print("The deamon intercepts the call request to the gateway manager")
+        print("----------------------------------------------------------")
         try:
             shared_key_agent = 'abcd123'
+
+            print("1. The yp is verified to be connected")
             self.ip_yp = self.access_coordinator.get_ip_yp_connected()
             self.server = Pyro4.Proxy(locate_yellow_page(self.nameserver, self.ip_yp))
+            print("The yp is ok to be connected")
+            print("-----------------------------------------------------------------")
 
+            print("Start the handshake validation process")
             if not is_valid_request_data(request):
+                print("The request is invalid")
                 raise CustomException(ErrorTypes.invalid_request)
+            print("The request is valid")
+            print("-----------------------------------------------------------------")
 
             id_entity = request["id"]
             ip_entity = conn.sock.getpeername()[0]
 
+            print("The entity id is: ", id_entity)
             status_ip = self.access_coordinator.check_ip_status(ip_entity)
             if status_ip.status_ip == NameListSecurity.blacklist:
                 log_message(f"{status_ip.message}")

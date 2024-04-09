@@ -117,14 +117,13 @@ class YellowPageIntegration:
         if ips and len(ips) > 0:
             opt_select = input("Do you want to use the yellow_page IP saved in the file? (y/n): -> default y ")
             if opt_select.lower() == 'y' or opt_select == '':
-                return self.select_ip(list(ips))
+                self.select_ip(list(ips))
             elif opt_select.lower() == 'n':
-                return self._request_ip()
+                self._request_ip()
             else:
                 print(ErrorTypes.invalid_option.message)
-                return None
         else:
-            return self._request_ip()
+            self._request_ip()
 
     def __verify_yellow_page(self, ip_yp):
         message = f"Wating for the yellow_page to be registered in the device {self.get_name_device(ip_yp)}..."
@@ -153,7 +152,7 @@ class YellowPageIntegration:
 
     def config_ip(self):
         time.sleep(1)
-        self.ip_yp = self.__select_or_request_ip()
+        self.__select_or_request_ip()
         if self.ip_yp:
             self.access_coordinator.add_ip_to_list(self.ip_yp, NameListSecurity.yellow_page_list)
             if self.__verify_yellow_page(self.ip_yp):
