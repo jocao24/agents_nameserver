@@ -1,11 +1,10 @@
 import Pyro4
-from Pyro4.errors import NamingError
 
 from src.daemon.data_validation import is_valid_request_data
 from src.daemon.service_locator import locate_yellow_page
 from src.manage_logs.manage_logs import log_message
 from src.security.access_coordinator.access_coordinator import AccessCoordinator
-from src.security.cryptography.crypto_utils import hash_key, decrypt_data, encrypt_data
+from src.utils.crypto_utils import hash_key, decrypt_data, encrypt_data
 from src.types.request_data_type import RequestDataType
 from src.utils.custom_exception import CustomException
 from src.utils.errors import ErrorTypes
@@ -37,7 +36,12 @@ class Daemon(Pyro4.Daemon):
 
             print("1. The yp is verified to be connected")
             self.ip_yp = self.access_coordinator.get_ip_yp_connected()
-            self.server = Pyro4.Proxy(locate_yellow_page(self.nameserver, self.ip_yp))
+            try:
+                uri_yp = locate_yellow_page(self.nameserver, self.ip_yp)
+                self.server = Pyro4.Proxy(uri_yp)
+            except Exception as e:
+                log_message(f"Error: {e}")
+                raise CustomException(ErrorTypes.yp_not_registered)
             print("The yp is ok to be connected")
             print("-----------------------------------------------------------------")
 
@@ -56,6 +60,7 @@ class Daemon(Pyro4.Daemon):
             if status_ip.status_ip == NameListSecurity.blacklist:
                 log_message(f"{status_ip.message}")
                 raise CustomException(ErrorTypes.ip_blocked)
+            print("The ip is not in the blacklist")
 
             shared_key = self.get_hash_key(request, shared_key_agent, ip_entity)
             data_decrypted = decrypt_data(request, shared_key)
@@ -66,11 +71,14 @@ class Daemon(Pyro4.Daemon):
                     raise CustomException(ErrorTypes.otp_required)
                 self.access_coordinator.authenticate(ip_entity, code_otp)
 
+            print("The entity is authenticated")
+
             data = {
                 "data_cifrated_yp": data_decrypted["data_cifrated_yp"],
                 "code_totp": code_otp,
                 "shared_key": shared_key_agent,
             }
+            print("The data sent to the yp is: ", data)
             iv, data_cifrated = encrypt_data(self.access_coordinator.shared_key_yp, data)
             self.server.request_register({
                 "id": id_entity,
@@ -78,6 +86,8 @@ class Daemon(Pyro4.Daemon):
                 "iv": iv,
                 "data": data_cifrated,
             })
+            self.access_coordinator.server = self.server
+            print("The data is sent successfully to the yp")
             return "Hello"
         except CustomException as e:
             raise CustomException(e.error_type)

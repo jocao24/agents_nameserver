@@ -40,5 +40,6 @@ class GatewayManager:
 
     @Pyro4.expose
     def register(self, id_agent: str):
+
         data = self.access_coordinator.server.get_access_data_for_register(id_agent)
         return data

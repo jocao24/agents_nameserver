@@ -129,7 +129,7 @@ class MenuNameServer:
         reset = '\033[0m'  # Reset formatting
         # Combinar las secuencias con el texto deseado
         formatted_key = f"{bold}{underline}{shared_key}{reset}"
-        print(f"The shared key for registering agents is: {formatted_key}. Please do not share it with anyone.")
+        print(f"The shared key for registering agents_remote_objects is: {formatted_key}. Please do not share it with anyone.")
         print("Note: This key will be valid for 10 minutes.")
 
     def get_options(self):
@@ -142,7 +142,7 @@ class MenuNameServer:
             6: "Remove whitelist",
             7: "Remove blacklist",
             8: "View logs",
-            9: "Exit"
+            10: "Exit"
         }
 
         options_execute = {
