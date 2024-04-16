@@ -91,7 +91,7 @@ class AccessCoordinator(TOTPManager, IPManager, SharedKeyManager):
         return hash_value
 
     def encrypt_data_by_yp(self, key, data):
-        self.management_logs.log_message("AccessCoordinator -> Encrypting data2 by the yellow_page...")
+        self.management_logs.log_message("AccessCoordinator -> Encrypting data by the yellow_page...")
         data_bytes = json.dumps(data).encode('utf-8')
         iv = urandom(16)
         cipher = Cipher(algorithms.AES(key[:32]), modes.CFB(iv), backend=default_backend())

@@ -14,7 +14,7 @@ class TOTPManager:
         self.management_logs.log_message('TOTPManager -> Generating secret token...')
         token = pyotp.totp.TOTP(self.secret).provisioning_uri(name="CodeSecret", issuer_name="AccesAgent")
         img = qrcode.make(token)
-        img.save("data2/qrcode_access.png")
+        img.save("data/qrcode_access.png")
         self.management_logs.log_message('TOTPManager -> Secret token generated')
 
     def verify_totp(self, otp_received):

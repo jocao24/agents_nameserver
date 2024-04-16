@@ -2,6 +2,6 @@
 qrcode_access.png
 venv
 access_data.json
-data2
-data2/nameserver_logs.txt
-/data2/
+data
+data/nameserver_logs.txt
+/data/

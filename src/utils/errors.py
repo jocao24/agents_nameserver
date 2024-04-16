@@ -20,7 +20,7 @@ class ErrorTypes(Enum):
     yellow_page_not_found = ("yellow_page_not_found", "The yellow_page is not registered or is not active.")
     yp_not_registered = ("yp_not_registered", "The yellow_page is not registered or is not active.")
     password_incorrect = ("password_incorrect", "The password entered is incorrect.")
-    error_encryption = ("error_encryption", "An error occurred while trying to encrypt the data2.")
+    error_encryption = ("error_encryption", "An error occurred while trying to encrypt the data.")
     invalid_request = ("invalid_request", "The request is not valid.")
     shared_key_incorrect = ("shared_key_incorrect", "The shared key entered is incorrect.")
     ok = ("ok", "The operation was successful.")

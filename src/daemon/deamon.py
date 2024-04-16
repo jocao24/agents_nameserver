@@ -45,10 +45,10 @@ class Daemon(Pyro4.Daemon):
                 self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> Error: {e}")
                 raise CustomException(ErrorTypes.yp_not_registered)
             if not is_valid_request_data(request):
-                self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> Invalid request data2")
+                self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> Invalid request data")
                 raise CustomException(ErrorTypes.invalid_request)
 
-            self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> Request data2 is valid and Yellow Page is connected")
+            self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> Request data is valid and Yellow Page is connected")
 
             ip_entity = conn.sock.getpeername()[0]
 
@@ -59,7 +59,7 @@ class Daemon(Pyro4.Daemon):
                 raise CustomException(ErrorTypes.ip_blocked)
 
             shared_key = self.get_hash_key(request, shared_key_agent, ip_entity)
-            self.access_coordinator.management_logs.log_message(f"Deamon -> {id_entity} -> Decrypting data2 ...")
+            self.access_coordinator.management_logs.log_message(f"Deamon -> {id_entity} -> Decrypting data ...")
             data_decrypted = decrypt_data(request, shared_key)
             self.access_coordinator.management_logs.log_message(f"Deamon -> {id_entity} -> Data decrypted: {data_decrypted}")
             is_white = status_ip.status_ip == NameListSecurity.whitelist
@@ -80,15 +80,15 @@ class Daemon(Pyro4.Daemon):
                 "code_totp": code_otp,
                 "shared_key": shared_key_agent,
             }
-            self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> Encrypting data2 ...")
+            self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> Encrypting data ...")
             iv, data_cifrated = encrypt_data(self.access_coordinator.shared_key_yp, data)
             self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> Data encrypted")
-            self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> Sending data2 to the yellow_page ...")
+            self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> Sending data to the yellow_page ...")
             self.server.request_register({
                 "id": id_entity,
                 "ip_entity": ip_entity,
                 "iv": iv,
-                "data2": data_cifrated,
+                "data": data_cifrated,
             })
             self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> Key pairs generated successfully by the yellow_page")
             self.access_coordinator.server = self.server

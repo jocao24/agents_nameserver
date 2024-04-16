@@ -23,7 +23,7 @@ def encrypt_data(shared_key: bytes, data: dict) -> (str, str):
 
 def decrypt_data(request: dict, shared_key: bytes) -> dict:
     iv = base64.b64decode(request["iv"])
-    data = base64.b64decode(request["data2"])
+    data = base64.b64decode(request["data"])
     cipher = Cipher(algorithms.AES(shared_key[:32]), modes.CFB(iv), backend=default_backend())
     decryptor = cipher.decryptor()
     decrypted_data = decryptor.update(data) + decryptor.finalize()
