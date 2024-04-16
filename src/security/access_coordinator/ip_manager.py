@@ -39,7 +39,7 @@ class IPManager:
             self.data_to_save[from_list_name].remove(ip)
         self.management_logs.log_message(f"IPManager -> The IP {ip} has been moved from the {from_list_name} to the {to_list_name}.")
         self.data_to_save[to_list_name].add(ip)
-        self.management_logs.log_message("IPManager -> Saving the data.")
+        self.management_logs.log_message("IPManager -> Saving the data2.")
         self.access_list_keeper.save(self.data_to_save)
         self.management_logs.log_message("IPManager -> Data saved successfully.")
         return ResponseType(
@@ -81,7 +81,7 @@ class IPManager:
                 )
         self.management_logs.log_message(f"IPManager -> The IP {ip} has been added to the {list_name}.")
         self.data_to_save[list_name].add(ip)
-        self.management_logs.log_message("IPManager -> Saving the data.")
+        self.management_logs.log_message("IPManager -> Saving the data2.")
         self.access_list_keeper.save(self.data_to_save)
         self.management_logs.log_message("IPManager -> Data saved successfully.")
         return ResponseType(
@@ -102,7 +102,7 @@ class IPManager:
 
         self.management_logs.log_message(f"IPManager -> The IP {ip} has been removed from the {list_name}.")
         self.data_to_save[list_name].remove(ip)
-        self.management_logs.log_message("IPManager -> Saving the data.")
+        self.management_logs.log_message("IPManager -> Saving the data2.")
         self.access_list_keeper.save(self.data_to_save)
         self.management_logs.log_message("IPManager -> Data saved successfully.")
         return ResponseType(
@@ -139,7 +139,7 @@ class IPManager:
             'ultimate_shared_key': '',
             'ultimate_shared_key_agent': ''
         }
-        self.management_logs.log_message("IPManager -> Saving the data.")
+        self.management_logs.log_message("IPManager -> Saving the data2.")
         self.access_list_keeper.save(self.data_to_save)
         self.management_logs.log_message("IPManager -> Data saved successfully.")
         return ResponseType(
