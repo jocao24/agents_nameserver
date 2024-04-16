@@ -4,35 +4,33 @@ import subprocess
 import time
 import Pyro4
 import sys
-from src.manage_logs.manage_logs import log_message, start_new_session_log
 from src.config.settings import ip_local, port_nameserver
+from src.manage_logs.manage_logs import ManagementLogs
 
 global process
 global_logs = []
 
 
 def signal_handler(signum, frame):
-    log_message("Intentional closure by the user")
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
     sys.exit(0)
 
 
-def setup_signal_handlers():
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-
-
-def create_nameserver_space():
+def create_nameserver_space(manage_logs: ManagementLogs):
     cmd = f"pyro4-ns --host {ip_local} -p {port_nameserver}"
     global process
     process = subprocess.Popen(cmd, shell=True)
-    start_new_session_log()
-    global_logs.append(log_message(f"Name Server started in: {ip_local}:{port_nameserver}"))
+    manage_logs.start_new_session_log()
+    global_logs.append(manage_logs.log_message(f"Name Server started in: {ip_local}:{port_nameserver}"))
 
 
-def terminate_nameserver_space():
+def terminate_nameserver_space(manage_logs: ManagementLogs):
     if process is not None:
         os.system("taskkill /f /im pyro4-ns.exe")
         print("Cleanup complete. Exiting now.")
+        manage_logs.log_message("Cleanup complete. Exiting now.")
+        os._exit(0)
         process.terminate()
         process.wait()
 
@@ -47,12 +45,13 @@ def wait_for_nameserver():
     return False
 
 
-def check_finally_event(finally_name_server, daemon):
+def check_finally_event(finally_name_server, daemon, manage_logs: ManagementLogs):
     finally_name_server.wait()
     daemon.shutdown()
-    terminate_nameserver_space()
+    terminate_nameserver_space(manage_logs)
     sys.exit()
 
 
-def daemon_loop(daemon: Pyro4.Daemon):
+def daemon_loop(daemon: Pyro4.Daemon, manage_logs: ManagementLogs):
+    manage_logs.log_message("Daemon loop started")
     daemon.requestLoop()

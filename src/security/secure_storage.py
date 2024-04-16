@@ -26,10 +26,8 @@ class SecureStorage:
         salt = os.urandom(16)
         key = self.__derive_key(salt)
         fernet = Fernet(key)
-
         data_str = json.dumps(data)
         encrypted_data = fernet.encrypt(data_str.encode())
-
         if not os.path.exists(os.path.dirname(self.file_path)):
             os.makedirs(os.path.dirname(self.file_path))
 

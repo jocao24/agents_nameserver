@@ -11,7 +11,6 @@ def locate_gateway(nameserver: Pyro4.Proxy):
 
 def locate_yellow_page(nameserver: Pyro4.Proxy, ip_yp: str):
     list_nameserver = nameserver.list()
-    print('list_nameserver', list_nameserver)
     name_yp = "yellow_page@" + ip_yp
     for name, uri in list_nameserver.items():
         if name_yp in name:

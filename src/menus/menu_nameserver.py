@@ -1,4 +1,3 @@
-from src.manage_logs.manage_logs import get_end_session_log, log_message
 from src.security.access_coordinator.access_coordinator import AccessCoordinator
 from src.utils.errors import ErrorTypes
 from src.utils.separators import show_separators, show_center_text_with_separators
@@ -12,31 +11,48 @@ class MenuNameServer:
         self.finally_name_server = finally_name_server
         self.running = True
 
+    def _view_logs_session_active(self):
+        self.access_coordinator.management_logs.self.access_coordinator.management_logs.log_message("Uploading the logs...")
+        all_logs = self.access_coordinator.management_logs.get_all_logs()
+        self.access_coordinator.management_logs.self.access_coordinator.management_logs.log_message("The logs have been uploaded successfully.")
+        last_session_start_index = all_logs.rfind("===== New Session Started =====")
+        if last_session_start_index != -1:
+            last_session_logs = all_logs[last_session_start_index:]
+        else:
+            last_session_logs = all_logs
+        show_center_text_with_separators("Logs Session Active")
+        print(last_session_logs[len("===== New Session Started =====\n"):])
+
     def _view_logs(self):
-        logs = get_end_session_log()
-        print(logs)
+        self.access_coordinator.management_logs.log_message("Uploading the logs...")
+        all_logs = self.access_coordinator.management_logs.get_all_logs()
+        self.access_coordinator.management_logs.log_message("The logs have been uploaded successfully.")
+        print(all_logs)
 
     def _add_whitelist(self):
+        self.access_coordinator.management_logs.log_message("Adding an IP to the whitelist...")
         ip = input("Enter the IP you want to add to the whitelist: ")
         is_valid_ip = validate_ip(ip)
         if is_valid_ip:
             data = self.access_coordinator.add_ip_to_list(ip, NameListSecurity.whitelist)
-            log_message(data.message)
-
+            self.access_coordinator.management_logs.log_message(data.message)
         else:
             print("The IP entered is not valid. Please enter a valid IP.")
 
     def _add_blacklist(self):
+        self.access_coordinator.management_logs.log_message("Adding an IP to the blacklist...")
         ip = input("Enter the IP you want to add to the blacklist: ")
         is_valid_ip = validate_ip(ip)
         if is_valid_ip:
             data = self.access_coordinator.add_ip_to_list(ip, NameListSecurity.blacklist)
-            log_message(data.message)
+            self.access_coordinator.management_logs.log_message(data.message)
         else:
             print("The IP entered is not valid. Please enter a valid IP.")
 
     def _view_whitelist(self):
+        self.access_coordinator.management_logs.log_message("Uploading the whitelist...")
         whitelist = self.access_coordinator.get_ips_in_list(NameListSecurity.whitelist)
+        self.access_coordinator.management_logs.log_message("The whitelist has been uploaded successfully.")
         i = 1
         if len(whitelist):
             for ip in whitelist:
@@ -56,6 +72,7 @@ class MenuNameServer:
             print("The blacklist is empty.")
 
     def _remove_ip(self, type_list: NameListSecurity, ip: str):
+        self.access_coordinator.management_logs.log_message(f"Removing the IP {ip} from the {type_list.value}...")
         opt_select = input(f"Do you want to add it to the {type_list.whitelist.value} ? (y/n): -> default n ")
         if opt_select.lower() != 'n' and opt_select.lower() != 'y' and opt_select != '':
             print(ErrorTypes.invalid_option.message)
@@ -72,7 +89,7 @@ class MenuNameServer:
                     response = self.access_coordinator.remove_ip_from_list(ip, NameListSecurity.blacklist, NameListSecurity.whitelist)
                 else:
                     response = self.access_coordinator.remove_ip_from_list(ip, NameListSecurity.whitelist, NameListSecurity.blacklist)
-            log_message(response.message)
+            self.access_coordinator.management_logs.log_message(response.message)
             print(response.message)
 
     def _remove_whitelist(self):
@@ -122,39 +139,47 @@ class MenuNameServer:
             self.check_finally_thread.join()
 
     def _view_shared_key(self):
-        shared_key = self.access_coordinator.generate_shared_key()
-        # ANSI escape secuences for bold and underline
+        self.access_coordinator.management_logs.log_message("Generating a shared key...")
+        shared_key = self.access_coordinator.get_shared_key_agent()
+        self.access_coordinator.management_logs.log_message("The shared key has been generated successfully.")
         bold = '\033[1m'
         underline = '\033[4m'
-        reset = '\033[0m'  # Reset formatting
-        # Combinar las secuencias con el texto deseado
+        reset = '\033[0m'
         formatted_key = f"{bold}{underline}{shared_key}{reset}"
         print(f"The shared key for registering agents_remote_objects is: {formatted_key}. Please do not share it with anyone.")
-        print("Note: This key will be valid for 10 minutes.")
+
+    def register_or_update_shared_key_by_yp(self):
+        self.access_coordinator.management_logs.log_message("Registering or updating the shared key provided by the yellow_page...")
+        self.access_coordinator.validate_shared_key()
+        self.access_coordinator.management_logs.log_message("The shared key has been registered or updated successfully.")
 
     def get_options(self):
         options = {
             1: "View Shared Key For Registering Agents",
-            2: "Add whitelist",
-            3: "Add blacklist",
-            4: "View whitelist",
-            5: "View blacklist",
-            6: "Remove whitelist",
-            7: "Remove blacklist",
-            8: "View logs",
-            10: "Exit"
+            2: "Register or Update Shared Key Proporciated by Yellow Page",
+            3: "Add whitelist",
+            4: "Add blacklist",
+            5: "View whitelist",
+            6: "View blacklist",
+            7: "Remove whitelist",
+            8: "Remove blacklist",
+            9: "View logs session active",
+            10: 'Show all logs',
+            11: "Exit"
         }
 
         options_execute = {
             1: self._view_shared_key,
-            2: self._add_whitelist,
-            3: self._add_blacklist,
-            4: self._view_whitelist,
-            5: self._view_blacklist,
-            6: self._remove_whitelist,
-            7: self._remove_blacklist,
-            8: self._view_logs,
-            9: self._exit
+            2: self.register_or_update_shared_key_by_yp,
+            3: self._add_whitelist,
+            4: self._add_blacklist,
+            5: self._view_whitelist,
+            6: self._view_blacklist,
+            7: self._remove_whitelist,
+            8: self._remove_blacklist,
+            9: self._view_logs_session_active,
+            10: self._view_logs,
+            11: self._exit
         }
 
         return options, options_execute
