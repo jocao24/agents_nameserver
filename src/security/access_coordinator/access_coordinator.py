@@ -52,18 +52,19 @@ class AccessCoordinator(TOTPManager, IPManager, SharedKeyManager):
     def validate_shared_key(self, ip_yp=None, request_key=False):
         self.management_logs.log_message("AccessCoordinator -> Validating the shared key...")
         data_to_save = self.access_list_keeper.load()
-        key = data_to_save['ultimate_shared_key']
+        shared_key = data_to_save['ultimate_shared_key']
         if not ip_yp:
             ip_yp = self.ip_yp_connected
         if request_key:
-            key = None
+            shared_key = None
         while True:
-            if not key:
-                key = input("Enter the shared key provided by the yellow_page: ")
-            if key:
-                name_device = get_name_device(ip_yp, self.management_logs)
-                key_shared_com = (key + ip_yp + get_ip() + key + name_device + key + get_ip() + ip_yp)
-                key_shared_com_hash = self.hash_key_yp(key_shared_com, ip_yp)
+            if not shared_key:
+                shared_key = input("Enter the shared key provided by the yellow_page: ")
+            if shared_key:
+                name_device = get_name_device(get_ip(), self.management_logs)
+                ip_ns =  get_ip()
+                key_shared_com = (shared_key + ip_yp + ip_ns + shared_key + name_device + shared_key + get_ip() + ip_yp)
+                key_shared_com_hash = self.hash_key_yp(key_shared_com)
                 data = {"message": "ping"}
                 try:
                     iv, encrypted_data = self.encrypt_data_by_yp(key_shared_com_hash, data)
@@ -71,27 +72,26 @@ class AccessCoordinator(TOTPManager, IPManager, SharedKeyManager):
                     if response and response.get('message') == 'pong':
                         self.management_logs.log_message("The shared key has been correctly validated.")
                         print("The shared key has been correctly validated.")
-                        data_to_save['ultimate_shared_key'] = key
+                        data_to_save['ultimate_shared_key'] = shared_key
                         self.access_list_keeper.save(data_to_save)
                         self.shared_key_yp = key_shared_com_hash
                         return True
                     else:
                         self.management_logs.log_message("The shared key is not correct. Please try again.")
                         print("The shared key is not correct. Please try again.")
-                        key = None
+                        shared_key = None
                 except Exception as e:
                     print(f"An error occurred while trying to connect to the yellow_page: {e}")
                     self.management_logs.log_message(f"AccessCoordinator -> The shared key is not correct. Please try again. Error: {e}")
-                    key = None
+                    shared_key = None
             else:
                 self.management_logs.log_message("The shared key is not correct. Please try again.")
                 print("The shared key is not correct. Please try again.")
 
-    def hash_key_yp(self, key: str, ip_yp: str):
+    def hash_key_yp(self, key: str):
         self.management_logs.log_message("AccessCoordinator -> Hashing the shared key...")
-        key_complete = key + ip_yp + get_ip()
         digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
-        digest.update(key_complete.encode())
+        digest.update(key.encode())
         hash_value = digest.finalize()
         self.management_logs.log_message("AccessCoordinator -> The shared key has been hashed.")
         return hash_value
