@@ -50,24 +50,38 @@ class MenuNameServer:
             print("The IP entered is not valid. Please enter a valid IP.")
 
     def _view_whitelist(self):
+        """Displays the whitelist in a structured format."""
         self.access_coordinator.management_logs.log_message("Uploading the whitelist...")
         whitelist = self.access_coordinator.get_ips_in_list(NameListSecurity.whitelist)
         self.access_coordinator.management_logs.log_message("The whitelist has been uploaded successfully.")
-        i = 1
-        if len(whitelist):
-            for ip in whitelist:
+
+        print(show_separators())
+        print(show_center_text_with_separators("Whitelist"))
+        print(show_separators())
+        whitelist = list(whitelist)[3]
+
+        if whitelist:
+            for i, ip in enumerate(whitelist, start=1):
                 print(f"{i}. {ip}")
-                i += 1
         else:
             print("The whitelist is empty.")
+        print(show_separators())
 
     def _view_blacklist(self):
+        """Displays the blacklist in a structured format."""
+        self.access_coordinator.management_logs.log_message("Uploading the blacklist...")
         blacklist = self.access_coordinator.get_ips_in_list(NameListSecurity.blacklist)
-        i = 1
-        if len(blacklist):
-            for ip in blacklist:
+        self.access_coordinator.management_logs.log_message("The blacklist has been uploaded successfully.")
+
+        print(show_separators())
+        print(show_center_text_with_separators("Blacklist"))
+        print(show_separators())
+        blacklist = list(blacklist)[3]
+
+        if blacklist:
+            print(f"Total IPs in the blacklist: {blacklist}")
+            for i, ip in enumerate(blacklist, start=1):
                 print(f"{i}. {ip}")
-            i += 1
         else:
             print("The blacklist is empty.")
 
@@ -93,7 +107,7 @@ class MenuNameServer:
             print(response.message)
 
     def _remove_whitelist(self):
-        whitelist = self.access_coordinator.get_ips_in_list(NameListSecurity.whitelist)
+        whitelist = list(self.access_coordinator.get_ips_in_list(NameListSecurity.whitelist))[3]
         self._view_whitelist()
         if len(whitelist):
             ip = input("Enter the number of the IP you want to remove from the whitelist: ")
@@ -110,17 +124,16 @@ class MenuNameServer:
             print("The whitelist is empty.")
 
     def _remove_blacklist(self):
-        blacklist = list(self.access_coordinator.get_ips_in_list(NameListSecurity.blacklist))
+        blacklist = list(self.access_coordinator.get_ips_in_list(NameListSecurity.blacklist))[3]
         self._view_blacklist()
         if len(blacklist):
-            is_valid_input = False
             ip = input("Enter the number of the IP you want to remove from the blacklist: ")
             if ip.isdigit():
                 ip = int(ip)
                 if 0 < ip <= len(blacklist):
                     ip = list(blacklist)[ip - 1]
                     self._remove_ip(NameListSecurity.blacklist, ip)
-            if not is_valid_input:
+            else:
                 print(ErrorTypes.invalid_option.message)
         else:
             print("The blacklist is empty.")
