@@ -1,9 +1,9 @@
 import base64
+import json
 from os import urandom
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from Pyro4.util import json
 
 
 def hash_key(key: str) -> bytes:

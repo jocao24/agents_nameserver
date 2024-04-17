@@ -1,8 +1,11 @@
 import os
 import signal
 import subprocess
+import Pyro5.nameserver
+import Pyro5.errors
+import Pyro5.core
+import Pyro5.api
 import time
-import Pyro4
 import sys
 from src.config.settings import ip_local, port_nameserver
 from src.manage_logs.manage_logs import ManagementLogs
@@ -18,7 +21,7 @@ def signal_handler(signum, frame):
 
 
 def create_nameserver_space(manage_logs: ManagementLogs):
-    cmd = f"pyro4-ns --host {ip_local} -p {port_nameserver}"
+    cmd = f"pyro5-ns --host {ip_local} -p {port_nameserver}"
     global process
     process = subprocess.Popen(cmd, shell=True)
     manage_logs.start_new_session_log()
@@ -27,7 +30,7 @@ def create_nameserver_space(manage_logs: ManagementLogs):
 
 def terminate_nameserver_space(manage_logs: ManagementLogs):
     if process is not None:
-        os.system("taskkill /f /im pyro4-ns.exe")
+        os.system("taskkill /f /im pyro5-ns.exe")
         print("Cleanup complete. Exiting now.")
         manage_logs.log_message("Cleanup complete. Exiting now.")
         os._exit(0)
@@ -38,9 +41,9 @@ def terminate_nameserver_space(manage_logs: ManagementLogs):
 def wait_for_nameserver():
     for _ in range(10):
         try:
-            Pyro4.locateNS(host=ip_local, port=port_nameserver)
+            Pyro5.api.locate_ns(host=ip_local, port=port_nameserver)
             return True
-        except Pyro4.errors.NamingError:
+        except Pyro5.errors.NamingError:
             time.sleep(0.1)
     return False
 
@@ -52,6 +55,6 @@ def check_finally_event(finally_name_server, daemon, manage_logs: ManagementLogs
     sys.exit()
 
 
-def daemon_loop(daemon: Pyro4.Daemon, manage_logs: ManagementLogs):
+def daemon_loop(daemon: Pyro5.server.Daemon(), manage_logs: ManagementLogs):
     manage_logs.log_message("Daemon loop started")
     daemon.requestLoop()

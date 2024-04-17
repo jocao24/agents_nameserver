@@ -1,7 +1,7 @@
-import Pyro4
+import Pyro5.nameserver
 
 
-def locate_gateway(nameserver: Pyro4.Proxy):
+def locate_gateway(nameserver:Pyro5.nameserver.NameServer):
     list_nameserver = nameserver.list()
     for name, uri in list_nameserver.items():
         if "gateway_manager" in name:
@@ -9,7 +9,7 @@ def locate_gateway(nameserver: Pyro4.Proxy):
     return None
 
 
-def locate_yellow_page(nameserver: Pyro4.Proxy, ip_yp: str):
+def locate_yellow_page(nameserver: Pyro5.nameserver.NameServer, ip_yp: str):
     list_nameserver = nameserver.list()
     name_yp = "yellow_page@" + ip_yp
     for name, uri in list_nameserver.items():

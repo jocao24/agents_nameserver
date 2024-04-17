@@ -1,7 +1,7 @@
-import Pyro4
+import Pyro5
 
 
-def remove_duplicate_entities(nameserver: Pyro4.Proxy):
+def remove_duplicate_entities(nameserver: Pyro5.nameserver.NameServer):
     # Fetch the current list of registered objects in the nameserver
     registered_objects = nameserver.list()
 
@@ -24,7 +24,6 @@ def remove_duplicate_entities(nameserver: Pyro4.Proxy):
         if unique_identifier in seen_ids_names:
             # If it exists, it's considered a duplicate and should be removed
             try:
-                log_message(f"Removing duplicate: {name} with URI {uri}")
                 nameserver.remove(name)
             except NamingError as e:
                 # print(f"Error removing duplicate {name}: {e}")

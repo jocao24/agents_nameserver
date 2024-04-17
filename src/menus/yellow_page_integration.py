@@ -1,6 +1,10 @@
 from threading import Event
 import time
-import Pyro4
+import Pyro5.nameserver
+import Pyro5.errors
+import Pyro5.core
+import Pyro5.api
+
 from src.security.access_coordinator.access_coordinator import AccessCoordinator
 from src.utils.errors import ErrorTypes
 from src.utils.get_ip import get_ip
@@ -11,7 +15,7 @@ from src.utils.validate_ip import validate_ip
 
 
 class YellowPageIntegration:
-    def __init__(self, yp_event: Event, finally_ns: Event, ns: Pyro4.Proxy, access_coordinator: AccessCoordinator):
+    def __init__(self, yp_event: Event, finally_ns: Event, ns: Pyro5.nameserver.NameServer, access_coordinator: AccessCoordinator):
         self.yp_event = yp_event
         self.finally_name_server = finally_ns
         self.nameserver = ns
@@ -125,11 +129,13 @@ class YellowPageIntegration:
         while self.server_uri is None and max_attempts > 0:
             self.access_coordinator.management_logs.log_message(f"YellowPageIntegration -> Attempt {11 - max_attempts} to connect to the yellow_page...")
             try:
-                name_yellow_page = 'yellow_page@' + self.ip_yp
+                name_yellow_page = 'yellow_page' + self.ip_yp
                 self.access_coordinator.management_logs.log_message(f"YellowPageIntegration -> Looking for the yellow_page with the name: {name_yellow_page}")
-                self.server_uri = self.nameserver.lookup(name_yellow_page)
-                self.server = Pyro4.Proxy(self.server_uri)
-                if self.server_uri:
+                self.server = Pyro5.api.Proxy(f'PYROMETA:{name_yellow_page}')
+                ping = self.server.ping()
+                if ping == "pong":
+                    self.server_uri = self.server._pyroUri
+                    print(f"URI: {self.server_uri}")
                     self.access_coordinator.management_logs.log_message(f"YellowPageIntegration -> The yellow_page has been found with the URI: {self.server_uri}")
                     self.access_coordinator.set_ip_yp_connected(self.ip_yp, self.server)
                     message = (f"The device {get_name_device(self.ip_yp, self.access_coordinator.management_logs)} has been correctly configured as "
@@ -138,14 +144,14 @@ class YellowPageIntegration:
                     print(message)
                     found_yellow_page = True
 
-            except Pyro4.errors.NamingError:
-                self.access_coordinator.management_logs.log_message(f"YellowPageIntegration -> Error: {ErrorTypes.yellow_page_not_found.message}")
+            except Pyro5.errors.NamingError as e:
+                self.access_coordinator.management_logs.log_message(
+                    f"YellowPageIntegration -> Error: {ErrorTypes.yellow_page_not_found.message}")
             except Exception as e:
                 self.access_coordinator.management_logs.log_message(f"YellowPageIntegration -> Error: {e}")
             finally:
                 max_attempts -= 1
-
-            time.sleep(time_sleep)
+                time.sleep(time_sleep)
 
         return found_yellow_page
 
@@ -155,5 +161,5 @@ class YellowPageIntegration:
         if not found_yp:
             message = "The yellow_page is not registered or is not active."
             self.access_coordinator.management_logs.log_message(f"YellowPageIntegration -> {message}")
-            raise Pyro4.errors.CommunicationError(message)
+            raise Pyro5.errors.CommunicationError(message)
         return found_yp

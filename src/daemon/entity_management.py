@@ -1,10 +1,9 @@
-import Pyro4
-from Pyro4.errors import NamingError
+import Pyro5.nameserver
 
 from src.manage_logs.manage_logs import ManagementLogs
 
 
-def remove_duplicate_entities(nameserver: Pyro4.Proxy, management_logs: ManagementLogs):
+def remove_duplicate_entities(nameserver: Pyro5.nameserver.NameServer, management_logs: ManagementLogs):
     try:
         # Fetch the current list of registered objects in the nameserver
         registered_objects = nameserver.list()
@@ -26,7 +25,7 @@ def remove_duplicate_entities(nameserver: Pyro4.Proxy, management_logs: Manageme
                     try:
                         management_logs.log_message(f"Removing duplicate: {name} with URI {uri}")
                         nameserver.remove(name)
-                    except NamingError as e:
+                    except Exception as e:
                         # print(f"Error removing duplicate {name}: {e}")
                         management_logs.log_message(f"Error removing duplicate {name}: {e}")
                 else:

@@ -1,7 +1,8 @@
 from threading import Event
 from typing import TypedDict
 import threading
-import Pyro4
+import Pyro5.nameserver
+import Pyro5.server
 from src.menus.menu_nameserver import MenuNameServer
 from src.menus.yellow_page_integration import YellowPageIntegration
 from src.security.access_coordinator.access_coordinator import AccessCoordinator
@@ -11,10 +12,10 @@ configure_pyro()
 
 
 class GatewayManagerType(TypedDict):
-    nameserver: Pyro4.Proxy
+    nameserver: Pyro5.nameserver.NameServer
     yp_event: Event
     finally_name_server: Event
-    deamon: Pyro4.Daemon
+    deamon: Pyro5.server.Daemon
     access_coordinator: AccessCoordinator
     menu: MenuNameServer
 
@@ -31,9 +32,13 @@ class GatewayManager:
         self.check_server_thread.start()
         self.access_coordinator.management_logs.log_message("GatewayManager -> GatewayManager started")
 
-    @Pyro4.expose
+    @Pyro5.server.expose
     def register(self, id_agent: str):
         self.access_coordinator.management_logs.log_message(f"GatewayManager -> {id_agent} -> Registering agent")
         data = self.access_coordinator.server.get_access_data_for_register(id_agent)
         self.access_coordinator.management_logs.log_message(f"GatewayManager -> {id_agent} -> Rwgistered agent")
         return data
+
+    @Pyro5.server.expose
+    def ping(self):
+        return 'pong'

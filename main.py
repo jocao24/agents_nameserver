@@ -1,5 +1,8 @@
 import threading
-import Pyro4
+import Pyro5.api
+import Pyro5.errors
+import Pyro5.nameserver
+import Pyro5.core
 import sys
 import time
 from src.manage_logs.manage_logs import ManagementLogs
@@ -30,7 +33,7 @@ if __name__ == '__main__':
             global_logs.append(manage_logs.log_message("Error: NameServer did not start correctly."))
             exit(1)
 
-        nameserver = Pyro4.locateNS(host=ip_local, port=port_nameserver)
+        nameserver = Pyro5.api.locate_ns(host=ip_local, port=port_nameserver)
         daemon = Daemon(nameserver, access_coordinator, host=ip_local, port=9091)
         global_logs.append(manage_logs.log_message(f"NameServer located: {nameserver}"))
         menu = MenuNameServer(access_coordinator, finally_name_server)
@@ -44,7 +47,7 @@ if __name__ == '__main__':
             "menu": menu,
         })
         uri_gateway = daemon.register(gateway_manager)
-        nameserver.register("gateway_manager", uri_gateway)
+        nameserver.register("gateway_manager", uri_gateway, metadata={"gateway_manager"})
         global_logs.append(manage_logs.log_message(f"GatewayManager registered with URI: {uri_gateway}"))
         daemon_thread = threading.Thread(target=daemon_loop, daemon=True, args=(daemon, manage_logs))
         daemon_thread.start()

@@ -1,4 +1,6 @@
-import Pyro4
+import Pyro5.server
+import Pyro5.nameserver
+import Pyro5.api
 
 from src.daemon.data_validation import is_valid_request_data
 from src.daemon.service_locator import locate_yellow_page
@@ -10,8 +12,8 @@ from src.utils.errors import ErrorTypes
 from src.utils.name_list_security import NameListSecurity
 
 
-class Daemon(Pyro4.Daemon):
-    def __init__(self, nameserver: Pyro4.Proxy, access_coordinator: AccessCoordinator, *args, **kwargs):
+class Daemon(Pyro5.server.Daemon):
+    def __init__(self, nameserver:  Pyro5.nameserver.NameServer, access_coordinator: AccessCoordinator, *args, **kwargs):
         super(Daemon, self).__init__(*args, **kwargs)
         self.nameserver = nameserver
         self.gateway_uri = None
@@ -21,7 +23,7 @@ class Daemon(Pyro4.Daemon):
         self.access_coordinator.management_logs.log_message('Daemon -> Deamon started')
 
     def get_ip_entinty(self):
-        return Pyro4.current_context.client_sock_addr[0]
+        return Pyro5.current_context.client_sock_addr[0]
 
     def get_hash_key(self, request: dict, shared_key: str, ip: str):
         id_entity = request["id"]
@@ -39,7 +41,7 @@ class Daemon(Pyro4.Daemon):
             self.ip_yp = self.access_coordinator.get_ip_yp_connected()
             try:
                 uri_yp = locate_yellow_page(self.nameserver, self.ip_yp)
-                self.server = Pyro4.Proxy(uri_yp)
+                self.server = Pyro5.api.Proxy(uri_yp)
                 self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> The yellow_page is connected with the IP: {self.ip_yp}")
             except Exception as e:
                 self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> Error: {e}")
