@@ -141,6 +141,7 @@ class YellowPageIntegration:
             except Pyro4.errors.NamingError:
                 self.access_coordinator.management_logs.log_message(f"YellowPageIntegration -> Error: {ErrorTypes.yellow_page_not_found.message}")
             except Exception as e:
+                print(f"Error: {e}")
                 self.access_coordinator.management_logs.log_message(f"YellowPageIntegration -> Error: {e}")
             finally:
                 max_attempts -= 1

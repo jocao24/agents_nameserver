@@ -3,6 +3,7 @@ import Pyro4
 from src.daemon.data_validation import is_valid_request_data
 from src.daemon.service_locator import locate_yellow_page
 from src.security.access_coordinator.access_coordinator import AccessCoordinator
+from src.utils import get_name_device
 from src.utils.crypto_utils import hash_key, decrypt_data, encrypt_data
 from src.types.request_data_type import RequestDataType
 from src.utils.custom_exception import CustomException
@@ -88,7 +89,7 @@ class Daemon(Pyro4.Daemon):
                 "id": id_entity,
                 "ip_entity": ip_entity,
                 "iv": iv,
-                "data": data_cifrated,
+                "data": data_cifrated
             })
             self.access_coordinator.management_logs.log_message(f"Daemon -> {id_entity} -> Key pairs generated successfully by the yellow_page")
             self.access_coordinator.server = self.server

@@ -66,7 +66,7 @@ class AccessCoordinator(TOTPManager, IPManager, SharedKeyManager):
                 data = {"message": "ping"}
                 try:
                     iv, encrypted_data = self.encrypt_data_by_yp(key_shared_com_hash, data)
-                    response = self.server.ping(iv, encrypted_data)
+                    response = self.server.ping(iv, encrypted_data, get_name_device(get_ip(), self.management_logs))
                     if response and response.get('message') == 'pong':
                         self.management_logs.log_message("The shared key has been correctly validated.")
                         print("The shared key has been correctly validated.")
@@ -74,9 +74,14 @@ class AccessCoordinator(TOTPManager, IPManager, SharedKeyManager):
                         self.access_list_keeper.save(data_to_save)
                         self.shared_key_yp = key_shared_com_hash
                         return True
+                    else:
+                        self.management_logs.log_message("The shared key is not correct. Please try again.")
+                        print("The shared key is not correct. Please try again.")
+                        key = None
                 except Exception as e:
                     print(f"An error occurred while trying to connect to the yellow_page: {e}")
                     self.management_logs.log_message(f"AccessCoordinator -> The shared key is not correct. Please try again. Error: {e}")
+                    key = None
             else:
                 self.management_logs.log_message("The shared key is not correct. Please try again.")
                 print("The shared key is not correct. Please try again.")
