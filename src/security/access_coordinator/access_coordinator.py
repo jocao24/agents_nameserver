@@ -61,7 +61,8 @@ class AccessCoordinator(TOTPManager, IPManager, SharedKeyManager):
             if not key:
                 key = input("Enter the shared key provided by the yellow_page: ")
             if key:
-                key_shared_com = (key + ip_yp + get_ip() + key + get_name_device(get_ip(), self.management_logs) + key)
+                name_device = get_name_device(ip_yp, self.management_logs)
+                key_shared_com = (key + ip_yp + get_ip() + key + name_device + key + get_ip() + ip_yp)
                 key_shared_com_hash = self.hash_key_yp(key_shared_com, ip_yp)
                 data = {"message": "ping"}
                 try:
