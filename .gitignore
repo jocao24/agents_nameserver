@@ -5,3 +5,6 @@ access_data.json
 data
 data/nameserver_logs.txt
 /data/
+/*.csv
+/*.xlsx
+/*.pyc
