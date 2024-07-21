@@ -26,7 +26,7 @@ class ManagementLogs:
         self._start_periodic_flush()  # Reset the timer
 
     def log_message(self, message) -> str:
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.datetime.now().isoformat() 
         log_entry = f"{timestamp} - {message}\n"
         with self.lock:
             self.log_buffer += log_entry

@@ -2,7 +2,7 @@ import threading
 import Pyro4
 import sys
 import time
-from src.manage_logs.manage_logs import ManagementLogs
+from src.manage_logs.manage_logs_v_2 import ComponentType, LogType, ManagementLogs
 from src.menus.menu_nameserver import MenuNameServer
 from src.gateway.gateway_manager import GatewayManager
 from src.daemon.deamon import Daemon
@@ -27,12 +27,12 @@ if __name__ == '__main__':
         create_nameserver_space(manage_logs)
 
         if not wait_for_nameserver():
-            global_logs.append(manage_logs.log_message("Error: NameServer did not start correctly."))
+            global_logs.append(manage_logs.log_message(ComponentType.NAMESERVER, "Error: NameServer did not start correctly.", LogType.ERROR, False))
             exit(1)
 
         nameserver = Pyro4.locateNS(host=ip_local, port=port_nameserver)
         daemon = Daemon(nameserver, access_coordinator, host=ip_local, port=9091)
-        global_logs.append(manage_logs.log_message(f"NameServer located: {nameserver}"))
+        global_logs.append(manage_logs.log_message(ComponentType.NAMESERVER, f"NameServer located: {nameserver}", LogType.CONNECTION, True))
         menu = MenuNameServer(access_coordinator, finally_name_server)
 
         gateway_manager = GatewayManager({
@@ -45,7 +45,7 @@ if __name__ == '__main__':
         })
         uri_gateway = daemon.register(gateway_manager)
         nameserver.register("gateway_manager", uri_gateway)
-        global_logs.append(manage_logs.log_message(f"GatewayManager registered with URI: {uri_gateway}"))
+        global_logs.append(manage_logs.log_message(ComponentType.NAMESERVER, f"GatewayManager registered with URI: {uri_gateway}", LogType.REGISTRATION, True))
         daemon_thread = threading.Thread(target=daemon_loop, daemon=True, args=(daemon, manage_logs))
         daemon_thread.start()
         while not yp_located_event.is_set():
@@ -62,6 +62,6 @@ if __name__ == '__main__':
 
     except Exception as e:
         print(e)
-        manage_logs.log_message(f"Error: {e}")
+        manage_logs.log_message(ComponentType.NAMESERVER, f"Error: {e}", LogType.ERROR, False)
     finally:
         terminate_nameserver_space(manage_logs)

@@ -5,7 +5,7 @@ import time
 import Pyro4
 import sys
 from src.config.settings import ip_local, port_nameserver
-from src.manage_logs.manage_logs import ManagementLogs
+from src.manage_logs.manage_logs_v_2 import ComponentType, LogType, ManagementLogs
 
 global process
 global_logs = []
@@ -22,14 +22,13 @@ def create_nameserver_space(manage_logs: ManagementLogs):
     global process
     process = subprocess.Popen(cmd, shell=True)
     manage_logs.start_new_session_log()
-    global_logs.append(manage_logs.log_message(f"Name Server started in: {ip_local}:{port_nameserver}"))
-
+    global_logs.append(manage_logs.log_message(ComponentType.NAMESERVER_CONTROL, f"Name Server started in: {ip_local}:{port_nameserver}", LogType.DAEMON_START, True))
 
 def terminate_nameserver_space(manage_logs: ManagementLogs):
     if process is not None:
         os.system("taskkill /f /im pyro4-ns.exe")
         print("Cleanup complete. Exiting now.")
-        manage_logs.log_message("Cleanup complete. Exiting now.")
+        manage_logs.log_message(ComponentType.NAMESERVER_CONTROL, "Cleanup complete. Exiting now.", LogType.DAEMON_START, True)
         os._exit(0)
         process.terminate()
         process.wait()
@@ -53,5 +52,5 @@ def check_finally_event(finally_name_server, daemon, manage_logs: ManagementLogs
 
 
 def daemon_loop(daemon: Pyro4.Daemon, manage_logs: ManagementLogs):
-    manage_logs.log_message("Daemon loop started")
+    manage_logs.log_message(ComponentType.NAMESERVER_CONTROL, "Daemon loop started", LogType.DAEMON_START, True)
     daemon.requestLoop()

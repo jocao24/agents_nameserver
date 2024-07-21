@@ -7,26 +7,26 @@ def get_system_uuid():
 
     if operating_system == "Windows":
         try:
-            # Execute command to get the BIOS UUID in Windows
             output = subprocess.check_output('wmic csproduct get UUID', shell=True).decode()
-            # Filter output to get only the UUID
             uuid = output.split('\n')[1].strip()
             return uuid
         except subprocess.CalledProcessError as e:
-            print(f"Error obtaining UUID on Windows: {e}")
             return None
-
-    elif operating_system == "Linux":
-        try:
-            # Open and read the file containing the UUID in Linux
-            with open('/sys/class/dmi/id/product_uuid', 'r') as file:
-                uuid = file.read().strip()
-            return uuid
-        except FileNotFoundError as e:
-            print(f"UUID file not found on Linux: {e}")
-            return None
-
     else:
-        print(f"Operating system '{operating_system}' not supported for this operation.")
-        return None
+        try:
+            result = subprocess.run(['blkid'], capture_output=True, text=True, check=True)
+        except subprocess.CalledProcessError as e:
+            return None
+        uuids = {}
+        lines = result.stdout.splitlines()
+        for line in lines:
+            device_match = re.search(r'^([^:]+):', line)
+            uuid_match = re.search(r'UUID="([^"]+)"', line)
+            if device_match and uuid_match:
+                uuids[device_match.group(1)] = uuid_match.group(1)
+        if uuids:
+            first_device = next(iter(uuids))
+            return uuids[first_device]
 
+        else:
+            return None

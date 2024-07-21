@@ -1,8 +1,7 @@
 import Pyro4
 from Pyro4.errors import NamingError
-
-from src.manage_logs.manage_logs import ManagementLogs
-
+from src.manage_logs.manage_logs_v_2 import ManagementLogs
+from src.manage_logs.manage_logs_v_2 import LogType, ComponentType
 
 def remove_duplicate_entities(nameserver: Pyro4.Proxy, management_logs: ManagementLogs):
     try:
@@ -24,15 +23,14 @@ def remove_duplicate_entities(nameserver: Pyro4.Proxy, management_logs: Manageme
                 if name in seen_ids_names:
                     # If it exists, it"s considered a duplicate and should be removed
                     try:
-                        management_logs.log_message(f"Removing duplicate: {name} with URI {uri}")
+                        management_logs.log_message(ComponentType.ENTITY_MANAGEMENT, f"Removing duplicate: {name} with URI {uri}", LogType.REGISTRATION, False)
                         nameserver.remove(name)
                     except NamingError as e:
-                        # print(f"Error removing duplicate {name}: {e}")
-                        management_logs.log_message(f"Error removing duplicate {name}: {e}")
+                        management_logs.log_message(ComponentType.ENTITY_MANAGEMENT, f"Error removing duplicate {name}: {e}", LogType.ERROR, False)
                 else:
                     # If it"s not a duplicate, add it to the seen ids and names
                     seen_ids_names[name] = name
         except Exception as e:
-            print(e)
+            management_logs.log_message(ComponentType.ENTITY_MANAGEMENT, f"Error while processing registered objects: {e}", LogType.ERROR, False)
     except Exception as e:
-        print(e)
+        management_logs.log_message(ComponentType.ENTITY_MANAGEMENT, f"Error fetching registered objects from nameserver: {e}", LogType.ERROR, False)
