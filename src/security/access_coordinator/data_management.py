@@ -12,7 +12,7 @@ class DataManagement:
     _current_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Navega 2 nivel hacia atrás para ubicarte en el directorio que contiene 'src'
-    _project_root = os.path.abspath(os.path.join(_current_dir, os.pardir, os.pardir))
+    _project_root = os.path.abspath(os.path.join(_current_dir, os.pardir, os.pardir, os.pardir))
 
     # Concatena la carpeta 'data' a la ruta del proyecto
     _data_dir = os.path.join(_project_root, 'data') + os.sep 

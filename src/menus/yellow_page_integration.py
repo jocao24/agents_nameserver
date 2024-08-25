@@ -22,7 +22,7 @@ class YellowPageIntegration:
         self.access_coordinator = access_coordinator
 
     def _request_ip(self):
-        self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, "YellowPageIntegration -> Requesting the IP of the yellow_page...", LogType.REQUEST, True)
+        self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, "YellowPageIntegration -> Requesting the IP of the yellow_page...", LogType.REQUEST_YP, True)
         request_ip = True
         ip_yp = None
         while request_ip:
@@ -32,16 +32,15 @@ class YellowPageIntegration:
                 is_valid_ip = validate_ip(ip_yp)
                 if not is_valid_ip:
                     print(ErrorTypes.invalid_ip.message)
-                    self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f'YellowPageIntegration -> Error: {ErrorTypes.invalid_ip.message}', LogType.ERROR, False)
+                    self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f'YellowPageIntegration -> Error: {ErrorTypes.invalid_ip.message}', LogType.REQUEST_YP, False)
                 else:
                     request_ip = False
             else:
                 ip_yp = get_ip()
                 request_ip = False
-            self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> The IP of the yellow_page is: {ip_yp}", LogType.REQUEST, True)
+            self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> The IP of the yellow_page is: {ip_yp}", LogType.END_REQUEST_YP, True)
             response = self.access_coordinator.add_ip_to_list(ip_yp,  NameListSecurity.yellow_page_list)
-            self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> Response: {response}", LogType.RESPONSE, True)
-        self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> The IP of the yellow_page is: {ip_yp}", LogType.REQUEST, True)
+            self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> Response: {str(response).replace(',', ';')}", LogType.RESPONSE, True)
         return ip_yp
 
     def select_ip(self, ips: list[str]):
@@ -120,30 +119,30 @@ class YellowPageIntegration:
             print("IP configuration was not completed.")
 
     def check_server(self, message: str, time_sleep: int = 1, max_attempts: int = 10):
-        self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> {message}", LogType.CONNECTION, True)
+        self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> {message}", LogType.CONNECTION_YP, True)
         found_yellow_page = False
         self.server_uri = None
         while self.server_uri is None and max_attempts > 0:
-            self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> Attempt {11 - max_attempts} to connect to the yellow_page...", LogType.CONNECTION, True)
+            self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> Attempt {11 - max_attempts} to connect to the yellow_page...", LogType.CONNECTION_YP, True)
             try:
                 name_yellow_page = 'yellow_page@' + self.ip_yp
-                self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> Looking for the yellow_page with the name: {name_yellow_page}", LogType.CONNECTION, True)
+                self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> Looking for the yellow_page with the name: {name_yellow_page}", LogType.CONNECTION_YP, True)
                 self.server_uri = self.nameserver.lookup(name_yellow_page)
                 self.server = Pyro4.Proxy(self.server_uri)
                 if self.server_uri:
-                    self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> The yellow_page has been found with the URI: {self.server_uri}", LogType.CONNECTION, True)
+                    self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> The yellow_page has been found with the URI: {self.server_uri}", LogType.END_REQUEST_YP, True)
                     self.access_coordinator.set_ip_yp_connected(self.ip_yp, self.server)
                     message = (f"The device {get_name_device(self.ip_yp, self.access_coordinator.management_logs)} has been correctly configured as "
                                f"yellow_page.")
-                    self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> {message}", LogType.CONNECTION, True)
+                    self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> {message}", LogType.END_CONNECTION_YP, True)
                     print(message)
                     found_yellow_page = True
 
             except Pyro4.errors.NamingError:
-                self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> Error: {ErrorTypes.yellow_page_not_found.message}", LogType.ERROR, False)
+                self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> Error: {ErrorTypes.yellow_page_not_found.message}", LogType.END_CONNECTION_YP, False)
             except Exception as e:
                 print(f"Error: {e}")
-                self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> Error: {str(e)}", LogType.ERROR, False)
+                self.access_coordinator.management_logs.log_message(ComponentType.YELLOW_PAGE_INTEGRATION, f"YellowPageIntegration -> Error: {str(e).replace(',' '|')}", LogType.END_CONNECTION_YP, False)
             finally:
                 max_attempts -= 1
 

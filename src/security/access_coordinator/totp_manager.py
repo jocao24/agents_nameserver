@@ -25,11 +25,11 @@ class TOTPManager:
         # Concatena la carpeta 'data' a la ruta del proyecto
         data_dir = os.path.join(project_root, 'data') + os.sep
         img.save(f"{data_dir}qrcode_access.png")
-        self.management_logs.log_message(ComponentType.TOTP_MANAGER, 'Secret token generated', LogType.KEY_GENERATION, True)
+        self.management_logs.log_message(ComponentType.TOTP_MANAGER, 'Secret token generated', LogType.END_KEY_GENERATION, True)
 
     def verify_totp(self, otp_received):
-        self.management_logs.log_message(ComponentType.TOTP_MANAGER, 'Verifying TOTP...', LogType.VALIDATION)
+        self.management_logs.log_message(ComponentType.TOTP_MANAGER, 'Verifying TOTP...', LogType.VALIDATION_TOTP)
         totp = pyotp.TOTP(self.secret)
         result = totp.verify(otp_received)
-        self.management_logs.log_message(ComponentType.TOTP_MANAGER, f'TOTP verified: {result}', LogType.VALIDATION, result)
+        self.management_logs.log_message(ComponentType.TOTP_MANAGER, f'TOTP verified: {result}', LogType.END_VALIDATION_TOTP, result)
         return result

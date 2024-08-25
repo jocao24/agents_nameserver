@@ -49,6 +49,6 @@ class SharedKeyManager:
         return False
 
     def register_key_shared_yp(self, key: bytes):
-        self.management_logs.log_message(ComponentType.SHARED_KEY_MANAGER, 'Registering shared key with the yellow_page...', LogType.REGISTRATION)
+        self.management_logs.log_message(ComponentType.SHARED_KEY_MANAGER, 'Registering shared key with the yellow_page...', LogType.END_REGISTRATION_YP)
         self.shared_key_yp = key
-        self.management_logs.log_message(ComponentType.SHARED_KEY_MANAGER, 'Shared key registered with the yellow_page', LogType.REGISTRATION, True)
+        self.management_logs.log_message(ComponentType.SHARED_KEY_MANAGER, 'Shared key registered with the yellow_page', LogType.END_REGISTRATION_YP, True)

@@ -34,18 +34,18 @@ class AccessCoordinator(TOTPManager, IPManager, SharedKeyManager):
         return self.ip_yp_connected
 
     def authenticate(self, ip: str, otp_received: str):
-        self.management_logs.log_message(ComponentType.ACCESS_COORDINATOR, f"Authenticating IP: {ip}", LogType.AUTHENTICATION)
+        self.management_logs.log_message(ComponentType.ACCESS_COORDINATOR, f"Authenticating IP: {ip}", LogType.AUTHENTICATION_BY_TOTP)
         if not self.verify_totp(otp_received):
             self.failed_login_attempts[ip] = self.failed_login_attempts.get(ip, 0) + 1
-            self.management_logs.log_message(ComponentType.ACCESS_COORDINATOR, f"The IP {ip} has entered an incorrect OTP. Failed attempts: {self.failed_login_attempts[ip]}", LogType.AUTHENTICATION, False)
+            self.management_logs.log_message(ComponentType.ACCESS_COORDINATOR, f"The IP {ip} has entered an incorrect TOTP. Failed attempts: {self.failed_login_attempts[ip]}", LogType.END_AUTHENTICATION_BY_TOTP, False)
             if self.failed_login_attempts[ip] > 3:
-                self.management_logs.log_message(ComponentType.ACCESS_COORDINATOR, f"The IP {ip} has been blocked for multiple unsuccessful attempts.", LogType.AUTHENTICATION, False)
+                self.management_logs.log_message(ComponentType.ACCESS_COORDINATOR, f"The IP {ip} has been blocked for multiple unsuccessful attempts.", LogType.AUTHENTICATION_BY_TOTP, False)
                 raise CustomException(ErrorTypes.ip_blocked)
             else:
-                self.management_logs.log_message(ComponentType.ACCESS_COORDINATOR, "Incorrect OTP code. Please try again.", LogType.AUTHENTICATION, False)
+                self.management_logs.log_message(ComponentType.ACCESS_COORDINATOR, "Incorrect TOTP code. Please try again.", LogType.AUTHENTICATION_BY_TOTP, False)
                 raise CustomException(ErrorTypes.otp_incorrect)
         self.add_ip_to_list(ip, NameListSecurity.whitelist)
-        self.management_logs.log_message(ComponentType.ACCESS_COORDINATOR, f"The IP {ip} has been added to the whitelist.", LogType.AUTHENTICATION)
+        self.management_logs.log_message(ComponentType.ACCESS_COORDINATOR, f"The IP {ip} has been added to the whitelist.", LogType.AUTHENTICATION_BY_TOTP)
         return ErrorTypes.ok
 
     def validate_shared_key(self, ip_yp=None, request_key=False):

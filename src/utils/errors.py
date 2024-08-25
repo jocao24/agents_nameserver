@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class ErrorTypes(Enum):
-    otp_required = ("otp_required", "An OTP code is required to authenticate to the GatewayManager.")
-    otp_incorrect = ("otp_incorrect", "Incorrect OTP code. Please try again.")
+    otp_required = ("otp_required", "An TOTP code is required to authenticate to the GatewayManager.")
+    otp_incorrect = ("otp_incorrect", "Incorrect TOTP code. Please try again.")
     ip_blocked = ("ip_blocked", "Your IP has been blocked for multiple unsuccessful attempts.")
     ip_not_allowed = ("ip_not_allowed", "Your IP is not authorized for operations.")
     parameters_invalid = ("parameters_invalid", "The parameters are not valid.")
