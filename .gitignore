@@ -7,4 +7,4 @@ data/nameserver_logs.txt
 /data/
 /*.csv
 /*.xlsx
-/*.pyc
+*.pyc
