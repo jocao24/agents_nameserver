@@ -21,7 +21,7 @@ class MenuNameServer:
     def _view_logs(self):
         self.access_coordinator.management_logs.log_message(ComponentType.MENU, "Uploading the logs...", LogType.UPLOAD, True)
         all_logs = self.access_coordinator.management_logs.get_all_logs()
-        self.access_coordinator.management_logs.log_message(ComponentType.MENU, "The logs have been uploaded successfully.", LogType._END_UPLOAD, True)
+        self.access_coordinator.management_logs.log_message(ComponentType.MENU, "The logs have been uploaded successfully.", LogType.END_UPLOAD, True)
         print(all_logs)
 
     def _export_logs_to_csv(self):
