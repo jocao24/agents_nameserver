@@ -166,11 +166,12 @@ class IPManager:
         start_time = time.perf_counter()
         self.management_logs.log_message(ComponentType.IP_MANAGER, f"Getting IPs in the {list_type.value}", LogType.QUERY)
         list_name = list_type.value
+        ips_list = list(self.data_to_save[list_name])
         end_time = time.perf_counter()
         log_execution_time_with_message(self.management_logs, f"Retrieved IPs in {list_name}", LogType.END_QUERY, ComponentType.IP_MANAGER, start_time, end_time)
         return ResponseType(
             success=True,
             message=f"IPs in the {list_name}.",
-            data=self.data_to_save[list_name],
+            data=ips_list,
             status_ip=list_type
         )

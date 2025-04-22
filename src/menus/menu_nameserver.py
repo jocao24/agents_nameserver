@@ -64,7 +64,6 @@ class MenuNameServer:
         print(show_separators())
         print(show_center_text_with_separators("Whitelist"))
         print(show_separators())
-        whitelist = list(whitelist)[3]
 
         if whitelist:
             for i, ip in enumerate(whitelist, start=1):
@@ -81,10 +80,8 @@ class MenuNameServer:
         print(show_separators())
         print(show_center_text_with_separators("Blacklist"))
         print(show_separators())
-        blacklist = list(blacklist)[3]
 
         if blacklist:
-            print(f"Total IPs in the blacklist: {blacklist}")
             for i, ip in enumerate(blacklist, start=1):
                 print(f"{i}. {ip}")
         else:
