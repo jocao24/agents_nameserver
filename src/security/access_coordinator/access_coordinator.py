@@ -12,7 +12,6 @@ from src.security.access_coordinator.totp_manager import TOTPManager
 from src.utils.custom_exception import CustomException
 from src.utils.errors import ErrorTypes
 from src.utils.get_name_device import get_name_device
-from src.utils.name_list_security import NameListSecurity
 from src.utils.get_ip import get_ip
 
 class AccessCoordinator(TOTPManager, IPManager, SharedKeyManager):
@@ -54,14 +53,19 @@ class AccessCoordinator(TOTPManager, IPManager, SharedKeyManager):
         shared_key = data_to_save['ultimate_shared_key']
         if not ip_yp:
             ip_yp = self.ip_yp_connected
+
+        if not ip_yp:
+            self.management_logs.log_message(ComponentType.ACCESS_COORDINATOR, "IP de yellow_page no definida durante la validación de la clave compartida", LogType.VALIDATION, False)
+            print("Yellow Page IP is not defined. Please configure it correctly.")
+            return False
         if request_key:
             shared_key = None
         while True:
             if not shared_key:
                 shared_key = input("Enter the shared key provided by the yellow_page: ")
             if shared_key:
-                name_device = get_name_device(get_ip(), self.management_logs)
-                ip_ns =  get_ip()
+                ip_ns = get_ip() or "127.0.0.1"
+                name_device = get_name_device(ip_ns, self.management_logs) or "unknown_device"
                 key_shared_com = (shared_key + ip_yp + ip_ns + shared_key + name_device + shared_key + get_ip() + ip_yp)
                 key_shared_com_hash = self.hash_key_yp(key_shared_com)
                 data = {"message": "ping"}
