@@ -71,7 +71,7 @@ class AccessCoordinator(TOTPManager, IPManager, SharedKeyManager):
                 data = {"message": "ping"}
                 try:
                     iv, encrypted_data = self.encrypt_data_by_yp(key_shared_com_hash, data)
-                    response = self.server.ping(iv, encrypted_data, get_name_device(get_ip(), self.management_logs))
+                    response = self.server.ping(iv, encrypted_data, name_device)
                     if response and response.get('message') == 'pong':
                         self.management_logs.log_message(ComponentType.ACCESS_COORDINATOR, "The shared key has been correctly validated.", LogType.VALIDATION)
                         print("The shared key has been correctly validated.")
