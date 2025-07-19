@@ -26,8 +26,8 @@ PyScreeze==0.1.30
 python-dateutil==2.9.0.post0
 pytweening==1.2.0
 pytz==2024.1
-pywin32==306
-pywinpty==2.0.13
+pywin32==306; platform_system == "Windows"
+pywinpty==2.0.13; platform_system == "Windows"
 qrcode==7.4.2
 serpent==1.41
 six==1.16.0
